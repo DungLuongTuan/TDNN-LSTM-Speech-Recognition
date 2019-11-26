@@ -1,0 +1,19 @@
+### parameters setup
+"There are 625 filters in each TDNN layer."
+"TDNN filters/layer : in TDNN-LSTMs - 1024 and in TDNN-BLSTMs - 512"
+-- https://danielpovey.com/files/2017_spl_tdnnlstm.pdf
+
+"we added a re-norm operation after Relu. The output dimension of each layer was fixed at 625 and 1280 for the Switchboard and Librispeech tasks respectively."
+-- https://www.researchgate.net/publication/333468926_Gated_Time_Delay_Neural_Network_for_Speech_Recognition
+
+### model architecture
+"To reduce the number of parameters, the transforms in the same layer of a TDNN network are tied across time steps. That means there is only a transform in the same layer of a TDNN that will take care of inputs at different time steps. TDNN is regarded as a precursor to the Convolution Neural Network (CNN) [5]. Through carefully designed architecture, TDNN enables  the network to discover relevant context information and common acoustic features that are useful in input sequences, rather than just discovering what is currently happening at current frame"
+-- https://www.researchgate.net/publication/333468926_Gated_Time_Delay_Neural_Network_for_Speech_Recognition
+
+"A TDNN starts with an FC layer that takes a stack of frames as its input
+and is replicated across different time-steps. The following layer
+then also takes as input a stack of different time-steps of the preceding
+layer and is also replicated across different time-steps. The initial
+layers thus learn to detect features within narrow temporal contexts
+while the later layers operate on a much larger temporal context."
+-- http://mi.eng.cam.ac.uk/~flk24/doc/icassp_2018.pdf

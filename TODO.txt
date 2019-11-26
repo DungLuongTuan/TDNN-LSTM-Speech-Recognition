@@ -1,0 +1,14 @@
+# define config file format
+- hparams.py
+
+# prepare modules
+- Input features (MFCCs, Pitch)
+- TDNN
+- Gated-TDNN
+- LSTM
+- Loss
+
+# train following models
+- TDNN
+- Gated-TDNN
+- TDNN-LSTM
