@@ -17,3 +17,11 @@ layer and is also replicated across different time-steps. The initial
 layers thus learn to detect features within narrow temporal contexts
 while the later layers operate on a much larger temporal context."
 -- http://mi.eng.cam.ac.uk/~flk24/doc/icassp_2018.pdf
+
+
+
+
+
+
+### questions
+làm cách nào alignment được dấu cách trong khi trên spectrogram các từ được đọc liên tiếp gần như không thể tách ra được???

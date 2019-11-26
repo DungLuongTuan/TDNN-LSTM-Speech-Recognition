@@ -1,6 +1,6 @@
 from __future__ import division
 import numpy
-from apis.python_speech_features import sigproc
+from speech_features import sigproc
 from scipy.fftpack import dct
 
 def mfcc(signal, samplerate=16000, winlen=0.025, winstep=0.01, numcep=13, 
@@ -29,7 +29,7 @@ def mfcc(signal, samplerate=16000, winlen=0.025, winstep=0.01, numcep=13,
     feat = dct(feat, type=2, axis=1, norm='ortho')[:,:numcep]
     feat = lifter(feat,ceplifter)
     if appendEnergy: feat[:,0] = numpy.log(energy) # replace first cepstral coefficient with log of frame energy
-    return feat
+    return feat, energy
 
 def fbank(signal, samplerate=16000, winlen=0.025, winstep=0.01, 
           nfilt=26, nfft=512, lowfreq=0, highfreq=None, preemph=0.97, 

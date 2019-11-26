@@ -16,7 +16,7 @@ data_configs = tf.contrib.training.HParams(
     highfreq = None, #highest band edge of mel filters. In Hz, default is samplerate/2
     preemph = 0.97, #apply preemphasis filter with preemph as coefficient. 0 is no filter. Default is 0.97.
     ceplifter = 22, #apply a lifter to final cepstral coefficients. 0 is no lifter. Default is 22.
-    appendEnergy = True, #if this is true, the zeroth cepstral coefficient is replaced with the log of the total frame energy.
+    appendEnergy = False, #if this is true, the zeroth cepstral coefficient is replaced with the log of the total frame energy.
     # pitch features
     use_pitch = False
 )
