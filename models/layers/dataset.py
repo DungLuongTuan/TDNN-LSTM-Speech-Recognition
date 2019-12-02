@@ -1,3 +1,4 @@
+import pdb
 import tensorflow as tf 
 
 class Dataset(object):
@@ -7,10 +8,12 @@ class Dataset(object):
         self.model_configs = model_configs
         self.training_configs = training_configs
         self.feature_dict = {
-            'input_feature': tf.FixedLenSequenceFeature([], dtype=tf.float32)
+            'input_feature': tf.FixedLenSequenceFeature([], dtype=tf.string)
         }
         self.context_dict = {
-            'output_class' : tf.FixedLenFeature([], dtype=tf.int64)
+            'output_class' : tf.FixedLenFeature([], dtype=tf.int64),
+            'feat_dim0'    : tf.FixedLenFeature([], dtype=tf.int64),
+            'feat_dim1'    : tf.FixedLenFeature([], dtype=tf.int64)
         }
 
     def parse_tfrecord(self, example):
@@ -24,9 +27,9 @@ class Dataset(object):
 
     def load_tfrecord(self):
         dataset = tf.data.TFRecordDataset(self.record_path)
-        dataset.map(self.parse_tfrecord)
-        dataset.batch(self.training_configs.batch_size)
-        self.iterator = Dataset.make_one_shot_iterator()
+        dataset = dataset.map(self.parse_tfrecord)
+        dataset = dataset.batch(self.training_configs.batch_size)
+        self.iterator = dataset.make_one_shot_iterator()
 
     def next_batch(self):
         return self.iterator.get_next()

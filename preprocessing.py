@@ -24,8 +24,8 @@ def serialize_example(feat, label):
     }
     context_dict = {
         'output_class' : tf.train.Feature(int64_list=tf.train.Int64List(value=[label])),
-        'feat_dim0' : tf.train.Feature(int64_list=tf.train.Int64List(value=[np.shape(feat[0])])),
-        'feat_dim1' : tf.train.Feature(int64_list=tf.train.Int64List(value=[np.shape(feat[1])])),
+        'feat_dim0' : tf.train.Feature(int64_list=tf.train.Int64List(value=[np.shape(feat)[0]])),
+        'feat_dim1' : tf.train.Feature(int64_list=tf.train.Int64List(value=[np.shape(feat)[1]])),
     }
     # Create a Features message using tf.train.Example.
     example_proto = tf.train.SequenceExample(feature_lists=tf.train.FeatureLists(feature_list=feature_list), context = tf.train.Features(feature=context_dict))
@@ -49,7 +49,7 @@ def main():
     filenames = ['.'.join(file.split('.')[:-1]) for file in os.listdir(os.path.join(train_path, 'time_lab'))]
     # write training record
     j = 0
-    with tf.python_io.TFRecordWriter(os.path.join('training_data', data_configs.speaker, 'train.record')) as writer:
+    with tf.io.TFRecordWriter(os.path.join('training_data', data_configs.speaker, 'train.record')) as writer:
         for filename in tqdm(filenames):
             # prepare input features and labels
             features = []

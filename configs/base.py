@@ -57,5 +57,10 @@ model_configs = tf.contrib.training.HParams(
 )
 
 training_configs = tf.contrib.training.HParams(
-    batch_size = 32
+    batch_size = 32,
+    learning_rate = 1e-3,
+    #Optimization parameters
+    adam_beta1 = 0.9, #AdamOptimizer beta1 parameter
+    adam_beta2 = 0.999, #AdamOptimizer beta2 parameter
+    adam_epsilon = 1e-6, #AdamOptimizer Epsilon parameter
 )
