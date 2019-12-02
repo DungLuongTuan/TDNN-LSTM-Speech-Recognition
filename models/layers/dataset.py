@@ -25,10 +25,14 @@ class Dataset(object):
         input_feature = tf.reshape(input_feature, [dim0, dim1])
         return input_feature, output_class
 
-    def load_tfrecord(self):
+    def load_tfrecord(self, shuffle = None, repeat = None):
         dataset = tf.data.TFRecordDataset(self.record_path)
         dataset = dataset.map(self.parse_tfrecord)
         dataset = dataset.batch(self.training_configs.batch_size)
+        if shuffle != None:
+            dataset = dataset.shuffle(shuffle)
+        if repeat != None:
+            dataset = dataset.repeat(repeat)
         self.iterator = dataset.make_one_shot_iterator()
 
     def next_batch(self):

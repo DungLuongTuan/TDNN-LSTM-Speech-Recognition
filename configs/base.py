@@ -26,7 +26,7 @@ data_configs = tf.contrib.training.HParams(
 model_configs = tf.contrib.training.HParams(
     model_name = 'TDNN',
     # input params
-    input_dims = 40, # base on extracted features, 40 for MFCCs only
+    input_dim = 40, # base on extracted features, 40 for MFCCs only
     num_frames = 23, # number of frames need to compute 1 label
     output_dim = 214, # list characters size
     # layers params
@@ -58,9 +58,12 @@ model_configs = tf.contrib.training.HParams(
 
 training_configs = tf.contrib.training.HParams(
     batch_size = 32,
+    training_step = 200000,
     learning_rate = 1e-3,
-    #Optimization parameters
+    # Optimization parameters
     adam_beta1 = 0.9, #AdamOptimizer beta1 parameter
     adam_beta2 = 0.999, #AdamOptimizer beta2 parameter
     adam_epsilon = 1e-6, #AdamOptimizer Epsilon parameter
+    # log params
+    save_step = 5000,
 )
