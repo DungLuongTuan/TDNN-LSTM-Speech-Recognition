@@ -18,12 +18,13 @@ from speech_features.base import mfcc, delta
 
 
 def serialize_example(feat, label):
-    features = [tf.train.Feature(bytes_list=tf.train.BytesList(value=[val.tostring()])) for val in feat]
+    input_features = [tf.train.Feature(bytes_list=tf.train.BytesList(value=[val.tostring()])) for val in feat]
+    output_features = [tf.train.Feature(float_list=tf.train.FloatList(value=[val])) for val in label]
     feature_list = {
-        'input_feature': tf.train.FeatureList(feature=features)
+        'input_feature': tf.train.FeatureList(feature=input_features),
+        'output_class' : tf.train.FeatureList(feature=output_features),
     }
     context_dict = {
-        'output_class' : tf.train.Feature(int64_list=tf.train.Int64List(value=[label])),
         'feat_dim0' : tf.train.Feature(int64_list=tf.train.Int64List(value=[np.shape(feat)[0]])),
         'feat_dim1' : tf.train.Feature(int64_list=tf.train.Int64List(value=[np.shape(feat)[1]])),
     }
@@ -92,8 +93,13 @@ def main():
                 feat_idx += 1    
             # write to TFRecord file
             for feat, label in zip(seq_features, labels):
-                example = serialize_example(feat, label)
+                one_hot_label = np.zeros(len(mapping))
+                one_hot_label[label] = 1
+                example = serialize_example(feat, one_hot_label)
                 writer.write(example)
+            j += 1
+            if j == 100:
+                break
 
     # generate Valid TF Record
     logging.info('generate valid TFRecord')
@@ -144,8 +150,13 @@ def main():
                 feat_idx += 1    
             # write to TFRecord file
             for feat, label in zip(seq_features, labels):
-                example = serialize_example(feat, label)
+                one_hot_label = np.zeros(len(mapping))
+                one_hot_label[label] = 1
+                example = serialize_example(feat, one_hot_label)
                 writer.write(example)
+            j += 1
+            if j == 100:
+                break
 
 if __name__ == '__main__':
     main()

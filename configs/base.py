@@ -25,10 +25,11 @@ data_configs = tf.contrib.training.HParams(
 
 model_configs = tf.contrib.training.HParams(
     model_name = 'TDNN',
+    subsample = True,
     # input params
     input_dim = 40, # base on extracted features, 40 for MFCCs only
     num_frames = 23, # number of frames need to compute 1 label
-    output_dim = 214, # list characters size
+    output_dim = 183, # list characters size
     # layers params
     num_layers = 4, # number layers of model
     layer_info = [
@@ -60,10 +61,17 @@ training_configs = tf.contrib.training.HParams(
     batch_size = 32,
     training_step = 200000,
     learning_rate = 1e-3,
+    #Learning rate schedule
+    decay_learning_rate = True, #boolean, determines if the learning rate will follow an exponential decay
+    start_decay = 40000, #Step at which learning decay starts
+    decay_steps = 18000, #Determines the learning rate decay slope (UNDER TEST)
+    decay_rate = 0.5, #learning rate decay rate (UNDER TEST)
+    initial_learning_rate = 1e-3, #starting learning rate
+    final_learning_rate = 1e-4, #minimal learning rate
     # Optimization parameters
     adam_beta1 = 0.9, #AdamOptimizer beta1 parameter
     adam_beta2 = 0.999, #AdamOptimizer beta2 parameter
     adam_epsilon = 1e-6, #AdamOptimizer Epsilon parameter
     # log params
-    save_step = 5000,
+    train_epochs = 25
 )
