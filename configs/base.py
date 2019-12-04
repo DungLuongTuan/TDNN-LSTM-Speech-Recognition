@@ -58,7 +58,7 @@ model_configs = tf.contrib.training.HParams(
 )
 
 training_configs = tf.contrib.training.HParams(
-    batch_size = 32,
+    batch_size = 512,
     training_step = 200000,
     learning_rate = 1e-3,
     #Learning rate schedule

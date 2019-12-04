@@ -69,7 +69,8 @@ class SubsampleTDNN():
                 num_iters = math.ceil(self.train_record_size/self.training_configs.batch_size)
                 for idx in tqdm(range(num_iters)):
                     loss, _ = sess.run([self.loss, self.optimizer])
-                    print("\rEpoch: ", epoch, " Step ", idx, " Loss: ", np.average(loss))
+                    if idx % 10 == 0:
+                        print("\rEpoch: ", epoch, " Step ", idx, " Loss: ", np.average(loss))
             except tf.errors.OutOfRangeError:
                 print('tf.errors.OutOfRangeError')
             # save checkpoint

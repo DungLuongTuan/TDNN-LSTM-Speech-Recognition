@@ -44,6 +44,7 @@ import tensorflow as tf
 def SubsampleTDNN(_input, num_layers, layer_info, input_dim, stddev=0.02):
     with tf.variable_scope('SubsampleTDNN') as scope:
         # calculate list of first layer context index
+        pass
         
 
 

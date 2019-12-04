@@ -97,9 +97,6 @@ def main():
                 one_hot_label[label] = 1
                 example = serialize_example(feat, one_hot_label)
                 writer.write(example)
-            j += 1
-            if j == 100:
-                break
 
     # generate Valid TF Record
     logging.info('generate valid TFRecord')
@@ -154,9 +151,6 @@ def main():
                 one_hot_label[label] = 1
                 example = serialize_example(feat, one_hot_label)
                 writer.write(example)
-            j += 1
-            if j == 100:
-                break
 
 if __name__ == '__main__':
     main()
