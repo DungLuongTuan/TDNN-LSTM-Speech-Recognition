@@ -9,7 +9,7 @@ from tqdm import tqdm
 from infolog import log
 from . import layers
 
-class SubsampleTDNN():
+class TDNN():
     def __init__(self, data_configs, model_configs, training_configs):
         self.data_configs  = data_configs
         self.model_configs = model_configs
@@ -42,8 +42,13 @@ class SubsampleTDNN():
 
         # add TDNN layers
         input_tensor = tf.expand_dims(input_tensor, -1)
-        # self.tdnn_out = layers.SubsampleTDNN(input_tensor, self.model_configs.num_layers, self.model_configs.layer_info, self.model_configs.input_dim)
-        self.tdnn_out = layers.TDNN(input_tensor, self.model_configs.num_layers, self.model_configs.layer_info, self.model_configs.input_dim, subsample=self.model_configs.subsample)
+        if self.model_configs.subsample:
+            self.tdnn_out = layers.SubsampleTDNN(input_tensor, self.model_configs.num_layers, self.model_configs.layer_info, 
+                                                self.model_configs.input_dim, max_left_frame=self.data_configs.left_frames, 
+                                                max_right_frame=self.data_configs.right_frames)
+        else:
+            self.tdnn_out = layers.TDNN(input_tensor, self.model_configs.num_layers, self.model_configs.layer_info, 
+                                        self.model_configs.input_dim, subsample=self.model_configs.subsample)
 
         # add sofmax layer
         self.output = layers.Softmax(self.tdnn_out, self.model_configs.layer_info[-1].num_filters, self.model_configs.output_dim)

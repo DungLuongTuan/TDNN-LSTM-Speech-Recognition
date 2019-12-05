@@ -1,2 +1,2 @@
 from .tdnn_lstm import TDNN_LSTM 
-from .tdnn import SubsampleTDNN
+from .tdnn import TDNN
