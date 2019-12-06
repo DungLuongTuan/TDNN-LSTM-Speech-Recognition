@@ -7,7 +7,7 @@ import tensorflow as tf
 import infolog
 
 from models import TDNN, TDNN_LSTM
-from configs.base import data_configs, model_configs, training_configs
+from configs.tdnn_lstm import data_configs, model_configs, training_configs
 
 log = infolog.log
 
@@ -18,6 +18,10 @@ def main():
     # train model
     if model_configs.model_name == 'TDNN':
         model = TDNN(data_configs, model_configs, training_configs)
+        model.initialize()
+        model.train()
+    elif model_configs.model_name == 'TDNN_LSTM':
+        model = TDNN_LSTM(data_configs, model_configs, training_configs)
         model.initialize()
         model.train()
 

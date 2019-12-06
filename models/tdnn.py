@@ -84,8 +84,8 @@ class TDNN():
             log("Calculate accuracy on valid set")
             num_iters = math.ceil(self.valid_record_size/self.training_configs.batch_size)
             true_pred = 0
+            input_tensor, target_tensor = self.valid_dataset.next_batch()
             for j in tqdm(range(num_iters)):
-                input_tensor, target_tensor = self.valid_dataset.next_batch()
                 _input, target = sess.run([input_tensor, target_tensor])
                 input_tensor = tf.get_default_graph().get_tensor_by_name("IteratorGetNext:0")
                 logit = sess.run(self.output, feed_dict = {input_tensor: _input})
