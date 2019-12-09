@@ -60,7 +60,7 @@ model_configs = tf.contrib.training.HParams(
 training_configs = tf.contrib.training.HParams(
     batch_size = 512,
     training_step = 200000,
-    learning_rate = 1e-3,
+    learning_rate = 1e-4,
     #Learning rate schedule
     decay_learning_rate = True, #boolean, determines if the learning rate will follow an exponential decay
     start_decay = 40000, #Step at which learning decay starts

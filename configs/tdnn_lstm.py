@@ -32,61 +32,66 @@ model_configs = tf.contrib.training.HParams(
     # input params
     input_dim = 40, # base on extracted features, 40 for MFCCs only
     max_seqlen = 1000, # max frame of input audio
-    output_dim = 183, # list characters size
+    output_dim = 184, # list characters size
     # layers params
-    num_layers = 7, # number layers of model
+    num_layers = 2, # number layers of model
     layer_info = [
         tf.contrib.training.HParams(
-            layer_name = 'TDNN',
-            context = [-2, -1, 0, 1, 2],
-            num_filters = 512
+            layer_name = 'TDNN_LSTM',
+            tdnn_num_layers = 3,
+            tdnn_layer_info = [
+                tf.contrib.training.HParams(
+                    layer_name = 'TDNN',
+                    context = [-2, -1, 0, 1, 2],
+                    num_filters = 512
+                ),
+                tf.contrib.training.HParams(
+                    layer_name = 'TDNN',
+                    context = [-1, 0, 1],
+                    num_filters = 512
+                ),
+                tf.contrib.training.HParams(
+                    layer_name = 'TDNN',
+                    context = [-1, 0, 1],
+                    num_filters = 512
+                )
+            ],
+            lstm_num_units = 256
         ),
         tf.contrib.training.HParams(
-            layer_name = 'TDNN',
-            context = [-1, 0, 1],
-            num_filters = 512
-        ),
-        tf.contrib.training.HParams(
-            layer_name = 'TDNN',
-            context = [-1, 0, 1],
-            num_filters = 512
-        ),
-        tf.contrib.training.HParams(
-            layer_name = 'LSTM',
-            num_units = 256
-        ),
-        tf.contrib.training.HParams(
-            layer_name = 'TDNN',
-            context = [-3, 0, 3],
-            num_filters = 512
-        ),
-        tf.contrib.training.HParams(
-            layer_name = 'TDNN',
-            context = [-3, 0, 3],
-            num_filters = 512
-        ),
-        tf.contrib.training.HParams(
-            layer_name = 'LSTM',
-            num_units = 256
-        ),
-    ],
+            layer_name = 'TDNN_LSTM',
+            tdnn_num_layers = 2,
+            tdnn_layer_info = [
+                tf.contrib.training.HParams(
+                    layer_name = 'TDNN',
+                    context = [-3, 0, 3],
+                    num_filters = 512
+                ),
+                tf.contrib.training.HParams(
+                    layer_name = 'TDNN',
+                    context = [-3, 0, 3],
+                    num_filters = 512
+                )
+            ],
+            lstm_num_units = 256
+        )
+    ]
     # general params
 )
 
 training_configs = tf.contrib.training.HParams(
     batch_size = 32,
-    learning_rate = 1e-3,
     #Learning rate schedule
     decay_learning_rate = True, #boolean, determines if the learning rate will follow an exponential decay
-    start_decay = 40000, #Step at which learning decay starts
-    decay_steps = 18000, #Determines the learning rate decay slope (UNDER TEST)
+    start_decay = 100, #Step at which learning decay starts
+    decay_steps = 500, #Determines the learning rate decay slope (UNDER TEST)
     decay_rate = 0.5, #learning rate decay rate (UNDER TEST)
-    initial_learning_rate = 1e-3, #starting learning rate
+    initial_learning_rate = 1e-2, #starting learning rate
     final_learning_rate = 1e-4, #minimal learning rate
     # Optimization parameters
     adam_beta1 = 0.9, #AdamOptimizer beta1 parameter
     adam_beta2 = 0.999, #AdamOptimizer beta2 parameter
     adam_epsilon = 1e-6, #AdamOptimizer Epsilon parameter
     # log params
-    train_epochs = 25
+    train_epochs = 1000
 )
