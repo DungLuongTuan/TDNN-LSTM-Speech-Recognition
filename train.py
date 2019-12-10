@@ -7,7 +7,7 @@ import tensorflow as tf
 import infolog
 
 from models import TDNN, TDNN_LSTM
-from configs.tdnn_lstm import data_configs, model_configs, training_configs
+from configs.tdnn_lstm  import data_configs, model_configs, training_configs
 
 log = infolog.log
 

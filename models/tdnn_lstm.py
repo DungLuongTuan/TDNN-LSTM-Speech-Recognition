@@ -203,14 +203,14 @@ class TDNN_LSTM():
         # temp = sess.run(self.tdnn_lstm_output, feed_dict={self.input_tensor: input_data, self.seqlen_tensor: seqlen_data, self.target_tensor: target_data})
         # pdb.set_trace()
         for epoch in range(self.training_configs.train_epochs):
-            # for idx in tqdm(range(train_dataset.max_step)):
-            #     input_data, target_data, seqlen_data = train_dataset.get_next()
-            #     loss, _, global_step = sess.run([self.loss, self.optimizer, self.global_step], feed_dict={self.input_tensor: input_data, self.seqlen_tensor: seqlen_data, 
-            #                                                                                  self.target_tensor: target_data})
-            #     if idx % 10 == 0:
-            #         print("\rEpoch: ", epoch, " Step ", global_step, " Loss: ", np.average(loss))
-            # # save model
-            # saver.save(sess, os.path.join(ckpt_path, 'model.ckpt'), global_step=global_step)
+            for idx in tqdm(range(train_dataset.max_step)):
+                input_data, target_data, seqlen_data = train_dataset.get_next()
+                loss, _, global_step = sess.run([self.loss, self.optimizer, self.global_step], feed_dict={self.input_tensor: input_data, self.seqlen_tensor: seqlen_data, 
+                                                                                             self.target_tensor: target_data})
+                if idx % 10 == 0:
+                    print("\rEpoch: ", epoch, " Step ", global_step, " Loss: ", np.average(loss))
+            # save model
+            saver.save(sess, os.path.join(ckpt_path, 'model.ckpt'), global_step=global_step)
             # run evaluate on valid set
             true_pred = 0
             num_pred  = 0
@@ -218,7 +218,6 @@ class TDNN_LSTM():
                 input_data, target_data, seqlen_data = train_dataset.get_next()
                 logit = sess.run(self.output, feed_dict={self.input_tensor: input_data, self.seqlen_tensor: seqlen_data, 
                                                                    self.target_tensor: target_data})
-                pdb.set_trace()
                 for i in range(len(seqlen_data)):
                     true_pred += np.sum(np.equal(np.argmax(logit[i][:seqlen_data[i]], axis=-1), np.argmax(target_data[i][:seqlen_data[i]], axis=-1)))
                     num_pred  += seqlen_data[i]

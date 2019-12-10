@@ -48,7 +48,7 @@ class TDNN():
                                                 max_right_frame=self.data_configs.right_frames)
         else:
             self.tdnn_out = layers.TDNN(input_tensor, self.model_configs.num_layers, self.model_configs.layer_info, 
-                                        self.model_configs.input_dim, subsample=self.model_configs.subsample)
+                                        self.model_configs.input_dim)
 
         # add sofmax layer
         self.output = layers.Softmax(self.tdnn_out, self.model_configs.layer_info[-1].num_filters, self.model_configs.output_dim)
@@ -85,12 +85,13 @@ class TDNN():
             num_iters = math.ceil(self.valid_record_size/self.training_configs.batch_size)
             true_pred = 0
             input_tensor, target_tensor = self.valid_dataset.next_batch()
+            input_model_tensor = tf.get_default_graph().get_tensor_by_name("IteratorGetNext:0")
+
             for j in tqdm(range(num_iters)):
                 _input, target = sess.run([input_tensor, target_tensor])
-                input_tensor = tf.get_default_graph().get_tensor_by_name("IteratorGetNext:0")
-                logit = sess.run(self.output, feed_dict = {input_tensor: _input})
-                true_pred += np.sum(np.equal(np.argmax(logit, axis=-1), np.argmax(target, axis=-1)))
-            log("Frame accuracy on valid set: " + str(true_pred/(num_iters*self.training_configs.batch_size)))
+                logit = sess.run(self.output, feed_dict = {input_model_tensor: _input})
+                true_pred += np.sum(np.equal(np.argmax(logit[:len(target)], axis=-1), np.argmax(target, axis=-1)))
+            log("Frame accuracy on valid set: " + str(true_pred/self.valid_record_size))
             
 
     def predict(self):

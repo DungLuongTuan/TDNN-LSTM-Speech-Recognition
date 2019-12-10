@@ -34,7 +34,7 @@ model_configs = tf.contrib.training.HParams(
     max_seqlen = 1000, # max frame of input audio
     output_dim = 184, # list characters size
     # layers params
-    num_layers = 2, # number layers of model
+    num_layers = 1, # number layers of model
     layer_info = [
         tf.contrib.training.HParams(
             layer_name = 'TDNN_LSTM',
@@ -58,23 +58,23 @@ model_configs = tf.contrib.training.HParams(
             ],
             lstm_num_units = 256
         ),
-        tf.contrib.training.HParams(
-            layer_name = 'TDNN_LSTM',
-            tdnn_num_layers = 2,
-            tdnn_layer_info = [
-                tf.contrib.training.HParams(
-                    layer_name = 'TDNN',
-                    context = [-3, 0, 3],
-                    num_filters = 512
-                ),
-                tf.contrib.training.HParams(
-                    layer_name = 'TDNN',
-                    context = [-3, 0, 3],
-                    num_filters = 512
-                )
-            ],
-            lstm_num_units = 256
-        )
+        # tf.contrib.training.HParams(
+        #     layer_name = 'TDNN_LSTM',
+        #     tdnn_num_layers = 2,
+        #     tdnn_layer_info = [
+        #         tf.contrib.training.HParams(
+        #             layer_name = 'TDNN',
+        #             context = [-3, 0, 3],
+        #             num_filters = 512
+        #         ),
+        #         tf.contrib.training.HParams(
+        #             layer_name = 'TDNN',
+        #             context = [-3, 0, 3],
+        #             num_filters = 512
+        #         )
+        #     ],
+        #     lstm_num_units = 256
+        # )
     ]
     # general params
 )

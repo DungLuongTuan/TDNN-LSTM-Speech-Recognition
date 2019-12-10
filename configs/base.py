@@ -29,36 +29,36 @@ model_configs = tf.contrib.training.HParams(
     # input params
     input_dim = 40, # base on extracted features, 40 for MFCCs only
     num_frames = 23, # number of frames need to compute 1 label
-    output_dim = 183, # list characters size
+    output_dim = 184, # list characters size
     # layers params
     num_layers = 4, # number layers of model
     layer_info = [
         tf.contrib.training.HParams(
             layer_name = 'TDNN',
             context = [-2, -1, 0, 1, 2],
-            num_filters = 512
+            num_filters = 2048
         ),
         tf.contrib.training.HParams(
             layer_name = 'TDNN',
             context = [-1, 2],
-            num_filters = 512
+            num_filters = 2048
         ),
         tf.contrib.training.HParams(
             layer_name = 'TDNN',
             context = [-3, 3],
-            num_filters = 512
+            num_filters = 2048
         ),
         tf.contrib.training.HParams(
             layer_name = 'TDNN',
             context = [-7, 2],
-            num_filters = 512
+            num_filters = 2048
         )
     ],
     # general params
 )
 
 training_configs = tf.contrib.training.HParams(
-    batch_size = 512,
+    batch_size = 1024,
     training_step = 200000,
     learning_rate = 1e-4,
     #Learning rate schedule
