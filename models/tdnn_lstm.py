@@ -37,7 +37,7 @@ class Dataset():
         self.data_path = os.path.join('data', self.data_configs.speaker, mode)
         self.batch_size = batch_size
         self.max_seqlen = max_seqlen
-        self.filenames = [file[:-4] for file in os.listdir(os.path.join(self.data_path, 'dur'))]
+        self.filenames = [file[:-4] for file in os.listdir(os.path.join(self.data_path, 'dur'))[:32]]
         self.max_step = int(math.ceil(len(self.filenames)/batch_size))
         self.dataset_size = len(self.filenames)
         self.mapping = {}
@@ -150,7 +150,8 @@ class TDNN_LSTM():
                                             self.model_configs.output_dim], dtype = tf.float32)
         self.global_step   = tf.Variable(0, name='global_step', trainable=False)
         # add layer to graph
-        self.tdnn_lstm_output = layers.TDNN_LSTM(self.input_tensor, self.seqlen_tensor, self.model_configs.num_layers, self.model_configs.layer_info, 
+        self.seqlen_mask = tf.sequence_mask(self.seqlen_tensor, self.model_configs.max_seqlen)
+        self.tdnn_lstm_output = layers.TDNN_LSTM(self.input_tensor, self.seqlen_mask, self.model_configs.num_layers, self.model_configs.layer_info, 
                                                 self.model_configs.input_dim, max_seqlen=self.model_configs.max_seqlen, 
                                                 max_left_frame=self.data_configs.left_frames, max_right_frame=self.data_configs.right_frames)
         # add softmax
@@ -218,6 +219,7 @@ class TDNN_LSTM():
                 input_data, target_data, seqlen_data = train_dataset.get_next()
                 logit = sess.run(self.output, feed_dict={self.input_tensor: input_data, self.seqlen_tensor: seqlen_data, 
                                                                    self.target_tensor: target_data})
+                # pdb.set_trace()
                 for i in range(len(seqlen_data)):
                     true_pred += np.sum(np.equal(np.argmax(logit[i][:seqlen_data[i]], axis=-1), np.argmax(target_data[i][:seqlen_data[i]], axis=-1)))
                     num_pred  += seqlen_data[i]

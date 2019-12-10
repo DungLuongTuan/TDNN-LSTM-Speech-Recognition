@@ -1,6 +1,7 @@
 data/*
 training_data/*
 checkpoint/*
+summaries/*
 __pycache__
 */__pycache__
 */*/__pycache__

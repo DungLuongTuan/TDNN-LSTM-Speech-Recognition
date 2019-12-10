@@ -56,7 +56,7 @@ model_configs = tf.contrib.training.HParams(
                     num_filters = 512
                 )
             ],
-            lstm_num_units = 256
+            lstm_num_units = 512
         ),
         # tf.contrib.training.HParams(
         #     layer_name = 'TDNN_LSTM',

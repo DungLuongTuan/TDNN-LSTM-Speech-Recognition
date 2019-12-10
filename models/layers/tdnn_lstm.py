@@ -59,7 +59,7 @@ import pdb
 #         return output
 
 
-def TDNN_LSTM(_input, sequence_length, num_layers, layer_info, input_dim, max_seqlen, max_left_frame, max_right_frame, stddev=0.02):
+def TDNN_LSTM(_input, seqlen_mask, num_layers, layer_info, input_dim, max_seqlen, max_left_frame, max_right_frame, stddev=0.02):
     with tf.variable_scope('TDNN_LSTM') as scope:
         # build hierachical context index of each layers
         upper_layer_idxs = list(np.arange(max_seqlen) + max_left_frame)
@@ -117,12 +117,15 @@ def TDNN_LSTM(_input, sequence_length, num_layers, layer_info, input_dim, max_se
                 # add LSTM layer
                 with tf.variable_scope('LSTM_layer') as scope:
                     output = tf.transpose(output, [3, 0, 1, 2])[0]
-                    lstm_cell = tf.contrib.rnn.LSTMCell(num_units = layer_info[lstm_idx].lstm_num_units)
+                    # lstm_cell = tf.keras.layers.LSTMCell(units = layer_info[lstm_idx].lstm_num_units)
+                    lstm = tf.keras.layers.LSTM(units = layer_info[lstm_idx].lstm_num_units, return_sequences = True)
                     if lstm_idx == num_layers - 1:
-                        output, state = tf.nn.dynamic_rnn(cell = lstm_cell, inputs = output, dtype=tf.float32, sequence_length = sequence_length)
+                        # output, state = tf.nn.dynamic_rnn(cell = lstm_cell, inputs = output, sequence_length = sequence_length, dtype=tf.float32)
+                        output = lstm(inputs = output, mask = seqlen_mask)
                     else:
-                        output, state = tf.nn.dynamic_rnn(cell = lstm_cell, inputs = output, dtype=tf.float32, sequence_length = None)
-                    output = tf.expand_dims(output, -1)
+                        # output, state = tf.nn.dynamic_rnn(cell = lstm_cell, inputs = output, dtype=tf.float32)
+                        output = lstm(inputs = output)
+                    # output = tf.expand_dims(output, -1)
     # return output
-    output = tf.squeeze(output)
+    # output = tf.squeeze(output)
     return output
