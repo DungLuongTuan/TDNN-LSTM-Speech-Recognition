@@ -58,23 +58,23 @@ model_configs = tf.contrib.training.HParams(
             ],
             lstm_num_units = 512
         ),
-        # tf.contrib.training.HParams(
-        #     layer_name = 'TDNN_LSTM',
-        #     tdnn_num_layers = 2,
-        #     tdnn_layer_info = [
-        #         tf.contrib.training.HParams(
-        #             layer_name = 'TDNN',
-        #             context = [-3, 0, 3],
-        #             num_filters = 512
-        #         ),
-        #         tf.contrib.training.HParams(
-        #             layer_name = 'TDNN',
-        #             context = [-3, 0, 3],
-        #             num_filters = 512
-        #         )
-        #     ],
-        #     lstm_num_units = 256
-        # )
+        tf.contrib.training.HParams(
+            layer_name = 'TDNN_LSTM',
+            tdnn_num_layers = 2,
+            tdnn_layer_info = [
+                tf.contrib.training.HParams(
+                    layer_name = 'TDNN',
+                    context = [-3, 0, 3],
+                    num_filters = 512
+                ),
+                tf.contrib.training.HParams(
+                    layer_name = 'TDNN',
+                    context = [-3, 0, 3],
+                    num_filters = 512
+                )
+            ],
+            lstm_num_units = 512
+        )
     ]
     # general params
 )

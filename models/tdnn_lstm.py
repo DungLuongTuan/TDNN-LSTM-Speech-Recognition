@@ -100,9 +100,6 @@ class Dataset():
         # add padding
         while len(features) < self.max_seqlen + self.data_configs.left_frames + self.data_configs.right_frames:
             features.append(np.zeros_like(features[0]))
-            label = np.zeros_like(labels[0])
-            label[0] = 1
-            labels.append(label)
         # return
         return features, labels, seqlen
 
@@ -115,7 +112,7 @@ class Dataset():
             _input, target, seqlen = self.get_feature(file)
             input_data.append(_input)
             seqlen_data.append(seqlen)
-            target_data.append(target)
+            target_data += target
         self.current_step += 1
         if self.current_step >= self.max_step:
             self.init_dataset()
@@ -146,19 +143,30 @@ class TDNN_LSTM():
                                             self.data_configs.left_frames + self.data_configs.right_frames, self.model_configs.input_dim, 1], 
                                             dtype = tf.float32)
         self.seqlen_tensor = tf.placeholder(name = 'sequence_length', shape = [None], dtype = tf.int32)
-        self.target_tensor = tf.placeholder(name = 'target', shape = [None, self.model_configs.max_seqlen, 
-                                            self.model_configs.output_dim], dtype = tf.float32)
+        self.target_tensor = tf.placeholder(name = 'target', shape = [None, self.model_configs.output_dim], dtype = tf.float32)
         self.global_step   = tf.Variable(0, name='global_step', trainable=False)
         # add layer to graph
         self.seqlen_mask = tf.sequence_mask(self.seqlen_tensor, self.model_configs.max_seqlen)
-        self.tdnn_lstm_output = layers.TDNN_LSTM(self.input_tensor, self.seqlen_mask, self.model_configs.num_layers, self.model_configs.layer_info, 
+        self.tdnn_lstm_output = layers.TDNN_LSTM(self.input_tensor, self.seqlen_tensor, self.model_configs.num_layers, self.model_configs.layer_info, 
                                                 self.model_configs.input_dim, max_seqlen=self.model_configs.max_seqlen, 
                                                 max_left_frame=self.data_configs.left_frames, max_right_frame=self.data_configs.right_frames)
+        
+        # compute mask output of TDNN-LSTM
+        self.mask = tf.cast(tf.where(tf.equal(tf.reshape(self.seqlen_mask, (1, -1))[0], tf.constant(True))), dtype=tf.int64)
+        self.mask = tf.reshape(self.mask, (1, -1))[0]
+        self.tdnn_lstm_output_slice = tf.reshape(self.tdnn_lstm_output, (-1, self.model_configs.layer_info[-1].lstm_num_units))
+        self.tdnn_lstm_output_gather = tf.gather(self.tdnn_lstm_output_slice, self.mask, axis = 0)
+
         # add softmax
-        self.output = layers.Softmax(self.tdnn_lstm_output, self.model_configs.layer_info[-1].lstm_num_units, self.model_configs.output_dim)
+        self.output = layers.Softmax(self.tdnn_lstm_output_gather, self.model_configs.layer_info[-1].lstm_num_units, self.model_configs.output_dim)
+        
+        # compute mask target tensor
+        # self.target_tensor_slice = tf.reshape(self.target_tensor, (-1, self.model_configs.output_dim))
+        # self.target_tensor_gather = tf.gather(self.target_tensor_slice, self.mask, axis = 0)
         # add loss
-        self.loss = tf.keras.losses.categorical_crossentropy(self.target_tensor, self.output)
-        # self.loss = tf.reduce_mean(tf.reduce_sum(-tf.reduce_sum(self.target_tensor * tf.log(self.output), axis = 2), axis = 1), axis = 0)
+        # self.loss = tf.keras.losses.categorical_crossentropy(self.target_tensor, self.output)
+
+        self.loss = tf.reduce_mean(-tf.reduce_sum(self.target_tensor * tf.log(self.output), axis = 1), axis = 0)
 
         # add optimizer
         self.learning_rate = self._learning_rate_decay()
@@ -201,7 +209,7 @@ class TDNN_LSTM():
         # pdb.set_trace()
 
         # input_data, target_data, seqlen_data = train_dataset.get_next()
-        # temp = sess.run(self.tdnn_lstm_output, feed_dict={self.input_tensor: input_data, self.seqlen_tensor: seqlen_data, self.target_tensor: target_data})
+        # temp = sess.run(self.output, feed_dict={self.input_tensor: input_data, self.seqlen_tensor: seqlen_data, self.target_tensor: target_data})
         # pdb.set_trace()
         for epoch in range(self.training_configs.train_epochs):
             for idx in tqdm(range(train_dataset.max_step)):
@@ -219,10 +227,8 @@ class TDNN_LSTM():
                 input_data, target_data, seqlen_data = train_dataset.get_next()
                 logit = sess.run(self.output, feed_dict={self.input_tensor: input_data, self.seqlen_tensor: seqlen_data, 
                                                                    self.target_tensor: target_data})
-                # pdb.set_trace()
-                for i in range(len(seqlen_data)):
-                    true_pred += np.sum(np.equal(np.argmax(logit[i][:seqlen_data[i]], axis=-1), np.argmax(target_data[i][:seqlen_data[i]], axis=-1)))
-                    num_pred  += seqlen_data[i]
+                true_pred += np.sum(np.equal(np.argmax(logit, axis=-1), np.argmax(target_data, axis=-1)))
+                num_pred  += sum(seqlen_data)
             log("Frame accuracy on valid set: " + str(true_pred/num_pred))
 
 
