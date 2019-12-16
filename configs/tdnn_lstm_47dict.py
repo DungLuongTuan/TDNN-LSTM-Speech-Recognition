@@ -8,8 +8,8 @@ data_configs = tf.contrib.training.HParams(
     # general params
     speaker = "ngoc_anh_vov", # speaker name also folder contain data data/<speaker>
     sample_rate = 16000, # sample rate of input audio
-    word_split = 'ConcatedVowels', # split word by charaters, vowels and consonants or somthing else
-    mapping_file = 'data/ossian_mapping.txt',
+    word_split = 'Phonetiser47ToneEnd', # split word by charaters, vowels and consonants or somthing else
+    mapping_file = 'data/dict47_mapping.txt',
     # mfccs params
     winlen = 0.025, #the length of the analysis window in seconds. Default is 0.025s (25 milliseconds)
     winstep = 0.01, #the step between successive windows in seconds. Default is 0.01s (10 milliseconds)
@@ -33,7 +33,7 @@ model_configs = tf.contrib.training.HParams(
     # input params
     input_dim = 43, # base on extracted features, 40 for MFCCs only
     max_seqlen = 1000, # max frame of input audio
-    output_dim = 184, # list characters size
+    output_dim = 150, # list characters size
     # layers params
     num_layers = 2, # number layers of model
     layer_info = [
@@ -87,7 +87,7 @@ training_configs = tf.contrib.training.HParams(
     start_decay = 10000, #Step at which learning decay starts
     decay_steps = 5000, #Determines the learning rate decay slope (UNDER TEST)
     decay_rate = 0.5, #learning rate decay rate (UNDER TEST)
-    initial_learning_rate = 5e-4, #starting learning rate
+    initial_learning_rate = 1e-3, #starting learning rate
     final_learning_rate = 1e-4, #minimal learning rate
     # Optimization parameters
     adam_beta1 = 0.9, #AdamOptimizer beta1 parameter

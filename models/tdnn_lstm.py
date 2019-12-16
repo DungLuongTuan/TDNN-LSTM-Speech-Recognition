@@ -2,6 +2,7 @@ import os
 import pdb
 import math
 import random
+import kaldi_io
 import numpy as np 
 import soundfile as sf
 import tensorflow as tf 
@@ -32,20 +33,34 @@ mfcc_std = [1.01826931, 65.7136309,  15.46226975, 17.15669019, 16.71445839, 25.9
             1.4424433,  1.4575192,   1.34579971,  1.211822]
 
 class Dataset():
-    def __init__(self, mode, data_configs, batch_size, max_seqlen):
+    def __init__(self, mode, data_configs, batch_size, max_seqlen, input_dim):
         self.data_configs = data_configs
         self.data_path = os.path.join('data', self.data_configs.speaker, mode)
         self.batch_size = batch_size
         self.max_seqlen = max_seqlen
-        self.filenames = [file[:-4] for file in os.listdir(os.path.join(self.data_path, 'dur'))[:32]]
+        self.input_dim = input_dim
+        self.filenames = [file[:-4] for file in os.listdir(os.path.join(self.data_path, 'dur'))]
         self.max_step = int(math.ceil(len(self.filenames)/batch_size))
         self.dataset_size = len(self.filenames)
         self.mapping = {}
-        with open('data/ossian_mapping.txt', 'r') as f:
+        with open(data_configs.mapping_file, 'r') as f:
             for i, row in enumerate(f):
                 _, char = row[:-1].split('\t')
                 self.mapping[char] = i
+        self.init_pitch()
         self.init_dataset()
+
+    def init_pitch(self):
+        filenames = {}
+        with open(os.path.join(self.data_path, 'pitch/wav.scp'), 'r') as f:
+            for row in f:
+                idx, path = row[:-1].split(' ')
+                filename = path.split('/')[-1][:-4]
+                filenames[idx] = filename
+        self.pitch = {}
+        ark_info = kaldi_io.read_mat_ark(os.path.join(self.data_path, 'pitch/information/feats.ark'))
+        for idx, val in ark_info:
+            self.pitch[filenames[idx]] = val
 
     def init_dataset(self):
         self.current_step = 0
@@ -67,10 +82,13 @@ class Dataset():
         delta_deltas_mfccs = delta(delta_mfccs, N = 2)
         # concate them to 40 dimension MFCCs
         mfcc_feats = np.concatenate((energy, mfccs, delta_mfccs, delta_deltas_mfccs), axis = 1)
+        # normalize mcc_feats
+        mfcc_feats = (mfcc_feats - mfcc_mean)/mfcc_std
+        # add pitch feature
+        max_frame_idx = min(len(mfcc_feats), len(self.pitch[filename]))
+        features = np.concatenate((mfcc_feats[:max_frame_idx], self.pitch[filename][:max_frame_idx]), axis=1)
         # add padding to list of features
-        # features = mfcc_feats
-        features = (mfcc_feats - mfcc_mean)/mfcc_std
-        features = list(np.concatenate((np.zeros((self.data_configs.left_frames, 40)), features, np.zeros((self.data_configs.right_frames, 40))), axis = 0))
+        features = list(np.concatenate((np.zeros((self.data_configs.left_frames, self.input_dim)), features, np.zeros((self.data_configs.right_frames, self.input_dim))), axis = 0))
         # read duration info file
         durations = []
         with open(os.path.join(self.data_path, 'dur', filename + '.dur'), 'r') as f:
@@ -186,8 +204,8 @@ class TDNN_LSTM():
             saver.restore(sess, tf.train.latest_checkpoint(ckpt_path))
 
         # train model
-        train_dataset = Dataset('train', self.data_configs, self.training_configs.batch_size, self.model_configs.max_seqlen)
-        valid_dataset = Dataset('valid', self.data_configs, self.training_configs.batch_size, self.model_configs.max_seqlen)
+        train_dataset = Dataset('train', self.data_configs, self.training_configs.batch_size, self.model_configs.max_seqlen, self.model_configs.input_dim)
+        valid_dataset = Dataset('valid', self.data_configs, self.training_configs.batch_size, self.model_configs.max_seqlen, self.model_configs.input_dim)
 
         # mean_val = np.zeros(40)
         # num_labels = 0
@@ -218,9 +236,10 @@ class TDNN_LSTM():
                                                                                              self.target_tensor: target_data})
                 if idx % 10 == 0:
                     print("\rEpoch: ", epoch, " Step ", global_step, " Loss: ", np.average(loss))
+                    log("Epoch: " + str(epoch) + " Step " + str(global_step) + " Loss: " + str(np.average(loss)))
             # save model
             saver.save(sess, os.path.join(ckpt_path, 'model.ckpt'), global_step=global_step)
-            # run evaluate on valid set
+            # run evaluate on train set
             true_pred = 0
             num_pred  = 0
             for idx in tqdm(range(train_dataset.max_step)):
@@ -229,6 +248,15 @@ class TDNN_LSTM():
                                                                    self.target_tensor: target_data})
                 true_pred += np.sum(np.equal(np.argmax(logit, axis=-1), np.argmax(target_data, axis=-1)))
                 num_pred  += sum(seqlen_data)
+            log("Frame accuracy on train set: " + str(true_pred/num_pred))
+            # run evaluate on valid set
+            true_pred = 0
+            num_pred = 0
+            for idx in tqdm(range(valid_dataset.max_step)):
+                input_data, target_data, seqlen_data = valid_dataset.get_next()
+                logit = sess.run(self.output, feed_dict={self.input_tensor: input_data, self.seqlen_tensor: seqlen_data, self.target_tensor: target_data})
+                true_pred += np.sum(np.equal(np.argmax(logit, axis=-1), np.argmax(target_data, axis=-1)))
+                num_pred += sum(seqlen_data)
             log("Frame accuracy on valid set: " + str(true_pred/num_pred))
 
 
